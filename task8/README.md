@@ -1,88 +1,332 @@
-# Clinic Appointment & Patient Management API
+# Clinic Appointment & Patient Management System
+<img width="1920" height="1080" alt="Screenshot 2026-10-16 135228" src="https://github.com/user-attachments/assets/360de6c2-d7d5-4227-b336-ac343a1f5f15" />
+<img width="1920" height="1080" alt="Screenshot 2026-10-16 135242" src="https://github.com/user-attachments/assets/20f6cdc9-7d66-4c0a-890c-d822793379d4" />
+<img width="1896" height="145" alt="Screenshot 2026-10-16 135304" src="https://github.com/user-attachments/assets/db2ad84a-2aee-4b59-891f-3aaa1f44f260" />
 
-FastAPI + MySQL + SQLAlchemy + Pydantic + JWT. Test endpoints using Swagger UI at `http://127.0.0.1:8000/docs`.
+## 1. Project Overview
 
-## 1. Setup
-1. Install Python 3.10+ and MySQL.
-2. Create the database:
-   ```sql
-   CREATE DATABASE clinic_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
-3. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate
-   ```
-   On macOS/Linux: `source .venv/bin/activate`
-4. Install packages: `pip install -r requirements.txt`
-5. Copy `.env.example` to `.env` and update `DATABASE_URL` and `SECRET_KEY`.
-6. Start the API from the project root:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-Tables are created automatically at startup for this training project. For production, use Alembic migrations.
+The Clinic Appointment & Patient Management System is a REST API application developed using **FastAPI, Python, MySQL, and SQLAlchemy**.
 
-## 2. Create an admin account
-Public registration deliberately creates **patients only**. To create the first admin safely, register a patient, then promote that user directly in MySQL:
-```sql
-UPDATE users SET role='admin' WHERE email='your-email@example.com';
+The main purpose of this project is to manage clinic operations such as doctor information, patient registration, appointment booking, and appointment management through APIs.
+
+The application provides authentication and authorization to control access to protected endpoints.
+
+## 2. Objectives
+
+- Manage user registration and login.
+- Secure APIs using JWT authentication.
+- Manage doctor information.
+- Book and manage clinic appointments.
+- Store application data in a MySQL database.
+- Validate request data using Pydantic.
+- Organize the application using a modular project structure.
+- Handle errors and return appropriate HTTP status codes.
+
+## 3. Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| Python | Main programming language |
+| FastAPI | Building REST APIs |
+| MySQL | Storing application data |
+| SQLAlchemy | Database operations and ORM |
+| Pydantic | Request and response validation |
+| PyMySQL | Connecting Python to MySQL |
+| JWT | Authentication using access tokens |
+| pwdlib with Argon2 | Password hashing |
+| Uvicorn | Running the FastAPI application |
+| Swagger UI | Testing API endpoints |
+
+## 4. Application Modules / Departments
+
+### 4.1 Authentication Module
+
+This module manages user authentication.
+
+Responsibilities:
+- User registration.
+- User login.
+- Password hashing.
+- JWT access-token generation.
+- Protecting endpoints using authentication dependencies.
+
+### 4.2 Doctor Management Module
+
+This module manages doctor-related information.
+
+Responsibilities:
+- Create doctor records.
+- Retrieve doctor information.
+- Update doctor information.
+- Delete doctor records, where supported by the implemented endpoints.
+
+### 4.3 Appointment Management Module
+
+This module manages clinic appointments.
+
+Responsibilities:
+- Create appointments.
+- Retrieve appointment information.
+- Update appointment details or status, where supported.
+- Delete appointments, where supported.
+- Filter appointments using available query parameters, including date filtering if configured.
+
+### 4.4 Admin Module
+
+This module provides administrative API endpoints intended for authorized users.
+
+Its available operations depend on the routes and permission checks implemented in the project.
+
+### 4.5 Database Module
+
+This module manages the connection between FastAPI and MySQL using SQLAlchemy.
+
+Responsibilities:
+- Configure the database connection.
+- Create database sessions.
+- Provide sessions to API endpoints.
+- Create database tables from SQLAlchemy models during application startup.
+
+## 5. Concepts Used
+
+### 5.1 REST API
+
+REST APIs allow clients to communicate with the application using HTTP methods.
+
+- `GET` – Retrieve information.
+- `POST` – Create information.
+- `PUT` or `PATCH` – Update information.
+- `DELETE` – Remove information.
+
+### 5.2 CRUD Operations
+
+CRUD means Create, Read, Update, and Delete. These operations are used to manage application records through API endpoints.
+
+### 5.3 SQLAlchemy ORM
+
+SQLAlchemy ORM maps Python classes to database tables. It allows the application to perform database operations using Python objects and queries instead of writing every SQL statement manually.
+
+### 5.4 Pydantic Validation
+
+Pydantic validates incoming request data using schemas. It helps ensure that API requests contain the expected data types and required fields.
+
+### 5.5 JWT Authentication
+
+JWT stands for JSON Web Token. After successful login, the application can issue an access token. The client sends that token when calling protected endpoints.
+
+The application validates the token before allowing access to protected operations.
+
+### 5.6 Password Hashing
+
+Passwords should not be stored as plain text. Password hashing stores a derived hash, which can be verified during login without storing the original password.
+
+### 5.7 Dependency Injection
+
+FastAPI dependencies provide reusable functionality such as database sessions and authenticated-user information to API endpoints.
+
+### 5.8 HTTP Status Codes
+
+The API uses HTTP status codes to communicate request results.
+
+- `200 OK` – Request successful.
+- `201 Created` – A resource was created.
+- `204 No Content` – Successful operation with no response body.
+- `400 Bad Request` – Invalid request or business-rule failure.
+- `401 Unauthorized` – Authentication is missing or invalid.
+- `403 Forbidden` – Access is not permitted.
+- `404 Not Found` – Requested resource does not exist.
+- `422 Unprocessable Entity` – Request validation failed.
+
+The exact codes depend on the behavior implemented by each endpoint.
+
+## 6. Project Structure
+
+```text
+task8/
+│
+├── app/
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   └── security.py
+│   │
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   ├── auth.py
+│   │   ├── doctors.py
+│   │   ├── appointments.py
+│   │   └── admin.py
+│   │
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── appointments.py
+│   │
+│   ├── __init__.py
+│   ├── database.py
+│   ├── dependencies.py
+│   ├── main.py
+│   ├── models.py
+│   └── schemas.py
+│
+├── .env
+├── .env.example
+├── README.md
+└── requirements.txt
 ```
-Log in again to obtain a token with the new role. Admins can create doctor profiles through `/admin/doctors`; the endpoint creates a linked doctor login user. Do not expose public role selection in registration.
 
-## 3. Swagger workflow
-1. `POST /auth/register` with name, email, password.
-2. `POST /auth/login` using form fields `username` (email) and `password`.
-3. Copy `access_token` from the response.
-4. Click **Authorize** and enter `Bearer YOUR_TOKEN` if prompted for the full value; if the dialog expects just a token, paste the token only.
-5. As admin, create a doctor via `/admin/doctors`.
-6. As doctor, create availability via `POST /doctors/me/availability`.
-7. As patient, book a slot via `POST /appointments`.
-8. Test listing, cancellation, role failures, invalid slots and duplicate bookings.
+### File Responsibilities
 
-## 4. Roles and business rules
-- Roles: `admin`, `doctor`, `patient`. Public registration only permits patient accounts.
-- Inactive accounts cannot log in or use protected endpoints.
-- Patients can view/cancel only their own appointments. Cancellation is blocked for completed/cancelled appointments and appointments that have already started.
-- Doctors can view their own appointments and update only appointments assigned to them.
-- Allowed status transitions: `Pending -> Confirmed/Cancelled`; `Confirmed -> Completed/Cancelled`; terminal states cannot be changed.
-- Appointment times must fit inside an available doctor time window. Overlap is checked against active appointments. The booking service locks the doctor row during the transaction to reduce concurrent booking conflicts; use a unique slot model / exclusion strategy and transaction tests for stronger guarantees in production.
-- Time slots use a date and start/end times. Availability windows may host multiple appointments if their time ranges do not overlap.
-- Admin statistics include user totals, appointment totals, counts by status and daily counts.
+- `main.py` – Creates the FastAPI application, registers routers, and initializes database tables.
+- `database.py` – Configures the SQLAlchemy engine and database session.
+- `models.py` – Defines database models.
+- `schemas.py` – Defines Pydantic request and response schemas.
+- `dependencies.py` – Provides shared dependencies, such as database sessions and authentication checks.
+- `core/config.py` – Loads application configuration.
+- `core/security.py` – Contains security-related functionality, including password hashing and JWT handling.
+- `routers/auth.py` – Contains authentication endpoints.
+- `routers/doctors.py` – Contains doctor-management endpoints.
+- `routers/appointments.py` – Contains appointment-management endpoints.
+- `routers/admin.py` – Contains administrative endpoints.
+- `services/appointments.py` – Contains reusable appointment-related business logic.
+- `.env` – Contains local configuration values and database credentials.
+- `.env.example` – Provides a template for configuration.
+- `requirements.txt` – Lists the required Python packages.
 
-## 5. Endpoint summary
-### Auth
-- `POST /auth/register` — patient registration
-- `POST /auth/login` — OAuth2 password form login; username is email
-- `GET /auth/me` — current account
+## 7. How the Application Works
 
-### Doctors
-- `GET /doctors` — search/filter/sort/paginate active doctors
-- `GET /doctors/{doctor_id}` — doctor profile
-- `POST /doctors/me/availability` — doctor creates an availability window
-- `GET /doctors/me/availability` — doctor's own windows
+### Step 1: Start the application
 
-### Appointments
-- `POST /appointments` — patient books
-- `GET /appointments` — own appointments for patients/doctors; admin can see all
-- `GET /appointments/{appointment_id}` — owner/assigned doctor/admin only
-- `PATCH /appointments/{appointment_id}/cancel` — patient cancels own eligible appointment
-- `PATCH /appointments/{appointment_id}/status` — assigned doctor or admin updates status
+Uvicorn starts the FastAPI application. During startup, SQLAlchemy connects to MySQL and the application initializes the database tables.
 
-### Admin
-- `POST /admin/doctors` — create doctor login + profile
-- `PATCH /admin/doctors/{doctor_id}` — update doctor profile
-- `PATCH /admin/doctors/{doctor_id}/deactivate` — deactivate doctor account
-- `GET /admin/statistics` — totals, status groups and daily counts
+### Step 2: Register a user
 
-## 6. Architecture
-- `models.py`: SQLAlchemy tables and relationships
-- `schemas.py`: request/response validation
-- `core/security.py`: password hashing and JWT
-- `dependencies.py`: database session, current user and role checks
-- `services/appointments.py`: booking conflict and status workflow
-- `routers/`: separated route groups
-- `main.py`: application setup and startup table creation
+The client sends registration data to the authentication API. The application validates the input and securely hashes the password before storing the user, if registration is implemented for that request.
 
-## 7. Notes
-- This is a runnable training baseline, not a production-certified medical system. Add Alembic migrations, audit logs, rate limiting, refresh-token strategy, privacy controls, automated tests, and stronger concurrency guarantees before deployment.
-- Do not put real patient information in screenshots or public repositories.
+### Step 3: Log in
+
+The user submits login credentials. The application verifies the credentials and returns an access token when authentication succeeds.
+
+### Step 4: Access protected APIs
+
+The client includes the JWT access token in the HTTP Authorization header:
+
+`Authorization: Bearer <access_token>`
+
+The authentication dependency validates the token before allowing the request to continue.
+
+### Step 5: Manage doctors and appointments
+
+The client sends requests to the doctor and appointment endpoints. FastAPI validates the request data, the application performs the required operations, and SQLAlchemy interacts with MySQL.
+
+### Step 6: Return the response
+
+FastAPI returns the result as JSON, together with an appropriate HTTP status code.
+
+## 8. Installation and Setup
+
+### Prerequisites
+
+- Python installed.
+- MySQL Server installed and running.
+- VS Code or another Python editor.
+- Required Python packages installed.
+
+### Step 1: Create the database
+
+Run this SQL in MySQL Workbench:
+
+```sql
+CREATE DATABASE IF NOT EXISTS clinic_db;
+```
+
+### Step 2: Configure environment variables
+
+Create a `.env` file in the root `task8` directory:
+
+```env
+DATABASE_URL=mysql+pymysql://root:root@localhost:3306/clinic_db
+SECRET_KEY=replace-with-a-long-random-secret
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+```
+
+Update the database username and password if your MySQL configuration differs.
+
+Do not commit `.env` or real database credentials to a public repository.
+
+### Step 3: Install dependencies
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Step 4: Start the server
+
+Run these commands from the `task8` directory:
+
+```bash
+python -m uvicorn app.main:app --reload
+```
+
+### Step 5: Open Swagger UI
+
+Visit:
+
+http://127.0.0.1:8000/docs
+
+Use Swagger UI to inspect and test the available API endpoints.
+
+## 9. API Testing
+
+The API can be tested using Swagger UI.
+
+Suggested testing sequence:
+
+1. Register a user, if the registration endpoint is available.
+2. Log in and obtain an access token.
+3. Use the **Authorize** option if configured for bearer-token authentication.
+4. Test doctor endpoints.
+5. Test appointment creation and retrieval.
+6. Test available appointment filters.
+7. Test invalid requests and unauthenticated access.
+8. Verify that records are saved in MySQL.
+
+The exact endpoint paths and required request bodies can be checked in Swagger UI.
+
+## 10. What I Implemented
+
+The project brings together the following development tasks:
+
+- Created a FastAPI application with a modular folder structure.
+- Configured MySQL connectivity using SQLAlchemy and PyMySQL.
+- Defined database models and Pydantic schemas.
+- Organized endpoints into separate routers for authentication, doctors, appointments, and administration.
+- Implemented security-related utilities for password hashing and JWT authentication.
+- Used dependencies to share database sessions and authentication logic.
+- Added appointment-related service logic.
+- Configured database table initialization during application startup.
+- Prepared the application for API testing through Swagger UI.
+- Created environment configuration files and project documentation.
+
+**Note:** This list describes the project's intended structure and implementation based on its files. Only claim an endpoint or feature is fully working after testing it successfully.
+
+## 11. Learning Outcomes
+
+Through this project, I practiced:
+
+- Building REST APIs with FastAPI.
+- Working with MySQL databases.
+- Using SQLAlchemy ORM.
+- Validating data with Pydantic.
+- Implementing JWT-based authentication.
+- Understanding password hashing.
+- Using dependency injection.
+- Structuring a Python application into modules.
+- Handling HTTP status codes and validation errors.
+- Testing APIs through Swagger UI.
+
+## 12. Conclusion
+
+The Clinic Appointment & Patient Management System is a backend application designed to organize clinic-related data through REST APIs. It combines FastAPI, MySQL, SQLAlchemy, Pydantic, and authentication concepts in a modular project structure.
+
+The project provides practical experience in backend development, database integration, API design, security, and API testing.
